@@ -74,6 +74,16 @@
             letter-spacing: 1px;
         }
 
+        #controls p {
+            font-size: 14px;
+            text-align: center;
+            letter-spacing: 1px;
+        }
+
+        #controls a {
+            color: #0096ff;
+        }
+
         .control-group {
             margin-bottom: 20px;
         }
@@ -283,12 +293,12 @@
         <div class="control-group">
             <div class="checkbox-wrapper">
                 <input type="checkbox" id="enableOutline" checked>
-                <label for="enableOutline">Ativar Contorno</label>
+                <label for="enableOutline">Enable Outline</label>
             </div>
         </div>
 
         <div class="control-group">
-            <label>Tamanho do Contorno <span class="value-display" id="outlineVal">1</span></label>
+            <label>Outline Size<span class="value-display" id="outlineVal">1</span></label>
             <input type="range" id="outline" min="0" max="5" value="1">
         </div>
 
@@ -332,6 +342,11 @@
         <button onclick="resetSettings()">Reset all</button>
 
         <div id="codeDisplay"></div>
+
+        <div class="section-divider"></div>
+
+        <p>You need <a href="https://steambrew.app/" target="_blank">Millennium</a> and <a href="https://github.com/girlglock/NoBrowserBackground" target="_blank">NoBrowserBG</a> to use on Steam browser.</p>
+        <p>Crosshair Overlay by <a href="https://nxty.cc" target="_blank">nxty</a>.</p>
     </div>
 
     <script>
@@ -532,7 +547,7 @@
             navigator.clipboard.writeText(url + codeDisplay.textContent).then(() => {
                 const btn = event.target;
                 const originalText = btn.textContent;
-                btn.textContent = '✓ Copiado!';
+                btn.textContent = '✓ Copied to clipboard!';
                 setTimeout(() => {
                     btn.textContent = originalText;
                 }, 2000);
