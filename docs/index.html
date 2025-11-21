@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <title>NX's CROSSHAIR OVERLAY</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #1a1f2e;
+            overflow: hidden;
+            font-family: 'Montserrat', sans-serif;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        body.transparent-bg {
+            background: transparent;
+        }
+
+        #crosshair {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+        }
+
+        .crosshair-line {
+            position: absolute;
+            background: white;
+            transform-origin: center;
+        }
+
+        .crosshair-dot {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        #controls {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #0c1015;
+            padding: 25px;
+            border-radius: 15px;
+            color: white;
+            width: 300px;
+            max-height: calc(100vh - 40px);
+            overflow-y: auto;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 10px 40px rgba(0, 150, 255, 0.2), 0 0 1px rgba(0, 200, 255, 0.5);
+            border: 1px solid rgba(0, 150, 255, 0.2);
+        }
+
+        #controls h2 {
+            margin-bottom: 25px;
+            font-size: 22px;
+            text-align: center;
+            color: #0096ff;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        .control-group {
+            margin-bottom: 20px;
+        }
+
+        .control-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #b0c4de;
+            letter-spacing: 0.3px;
+        }
+
+        .control-group input[type="range"] {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: rgba(0, 150, 255, 0.2);
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .control-group input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #0096ff;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(0, 150, 255, 0.5);
+            transition: all 0.2s;
+        }
+
+        .control-group input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 15px rgba(0, 150, 255, 0.8);
+        }
+
+        .control-group input[type="range"]::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #0096ff;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 0 10px rgba(0, 150, 255, 0.5);
+            transition: all 0.2s;
+        }
+
+        .control-group input[type="range"]::-moz-range-thumb:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 15px rgba(0, 150, 255, 0.8);
+        }
+
+        .control-group input[type="color"] {
+            width: 100%;
+            height: 45px;
+            border: 2px solid rgba(0, 150, 255, 0.3);
+            border-radius: 8px;
+            cursor: pointer;
+            background: #1a2332;
+        }
+
+        .control-group input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            margin-right: 10px;
+            accent-color: #0096ff;
+        }
+
+        .checkbox-wrapper {
+            display: flex;
+            align-items: center;
+        }
+
+        .value-display {
+            display: inline-block;
+            float: right;
+            color: #0096ff;
+            font-weight: 700;
+            font-size: 13px;
+        }
+
+        button {
+            width: 100%;
+            padding: 13px;
+            margin-top: 12px;
+            background: #0c1015;
+            color: #0096ff;
+            border: 1px solid #0096ff;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s;
+            letter-spacing: 0.5px;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        button:hover {
+            background: #0096ff;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 150, 255, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        #codeDisplay {
+            margin-top: 15px;
+            padding: 15px;
+            background: rgba(0, 50, 100, 0.2);
+            border-radius: 8px;
+            word-break: break-all;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            color: #0096ff;
+            border: 1px solid rgba(0, 150, 255, 0.4);
+            display: none;
+        }
+
+        @media (max-width: 720px), (max-height: 720px) {
+            #controls {
+                display: none;
+            }
+        }
+
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 50, 100, 0.2);
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #0096ff;
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #00b4ff;
+        }
+
+        .section-divider {
+            height: 1px;
+            background: rgba(0, 150, 255, 0.2);
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div id="crosshair">
+        <div class="crosshair-line" id="top"></div>
+        <div class="crosshair-line" id="bottom"></div>
+        <div class="crosshair-line" id="left"></div>
+        <div class="crosshair-line" id="right"></div>
+        <div class="crosshair-dot" id="dot"></div>
+    </div>
+
+    <div id="controls">
+        <h2>⊕ NX's CROSSHAIR OVERLAY</h2>
+        
+        <div class="control-group">
+            <label>Size <span class="value-display" id="sizeVal">10</span></label>
+            <input type="range" id="size" min="1" max="50" value="10">
+        </div>
+
+        <div class="control-group">
+            <label>Thickness <span class="value-display" id="thicknessVal">2</span></label>
+            <input type="range" id="thickness" min="1" max="10" value="2">
+        </div>
+
+        <div class="control-group">
+            <label>Gap <span class="value-display" id="gapVal">4</span></label>
+            <input type="range" id="gap" min="0" max="20" value="4">
+        </div>
+
+        <div class="section-divider"></div>
+
+        <div class="control-group">
+            <div class="checkbox-wrapper">
+                <input type="checkbox" id="rotated45">
+                <label for="rotated45">Rotate 45° (X)</label>
+            </div>
+        </div>
+
+        <div class="control-group">
+            <div class="checkbox-wrapper">
+                <input type="checkbox" id="hideTop">
+                <label for="hideTop">Hide top line (T)</label>
+            </div>
+        </div>
+
+        <div class="section-divider"></div>
+
+        <div class="control-group">
+            <label>Crosshair Color</label>
+            <input type="color" id="color" value="#ffffff">
+        </div>
+
+        <div class="control-group">
+            <div class="checkbox-wrapper">
+                <input type="checkbox" id="enableOutline" checked>
+                <label for="enableOutline">Ativar Contorno</label>
+            </div>
+        </div>
+
+        <div class="control-group">
+            <label>Tamanho do Contorno <span class="value-display" id="outlineVal">1</span></label>
+            <input type="range" id="outline" min="0" max="5" value="1">
+        </div>
+
+        <div class="control-group">
+            <label>Outline Color</label>
+            <input type="color" id="outlineColor" value="#000000">
+        </div>
+
+        <div class="section-divider"></div>
+
+        <div class="control-group">
+            <label>Opacity <span class="value-display" id="opacityVal">100%</span></label>
+            <input type="range" id="opacity" min="10" max="100" value="100">
+        </div>
+
+        <div class="section-divider"></div>
+
+        <div class="control-group">
+            <div class="checkbox-wrapper">
+                <input type="checkbox" id="showDot" checked>
+                <label for="showDot">Show center Dot</label>
+            </div>
+        </div>
+
+        <div class="control-group">
+            <label>Dot size <span class="value-display" id="dotSizeVal">4</span></label>
+            <input type="range" id="dotSize" min="1" max="15" value="4">
+        </div>
+
+        <div class="section-divider"></div>
+
+        <div class="control-group">
+            <div class="checkbox-wrapper">
+                <input type="checkbox" id="transparentBg">
+                <label for="transparentBg">Transparent Overlay</label>
+            </div>
+        </div>
+
+        <button onclick="generateCode()">Gen Code</button>
+        <button onclick="copyCode()">Copy Share Link</button>
+        <button onclick="resetSettings()">Reset all</button>
+
+        <div id="codeDisplay"></div>
+    </div>
+
+    <script>
+        const config = {
+            size: 10,
+            thickness: 2,
+            gap: 4,
+            outline: 1,
+            opacity: 100,
+            color: '#ffffff',
+            outlineColor: '#000000',
+            showDot: true,
+            dotSize: 4,
+            rotated45: false,
+            hideTop: false,
+            enableOutline: true,
+            transparentBg: false
+        };
+
+        function updateCrosshair() {
+            const top = document.getElementById('top');
+            const bottom = document.getElementById('bottom');
+            const left = document.getElementById('left');
+            const right = document.getElementById('right');
+            const dot = document.getElementById('dot');
+            const crosshair = document.getElementById('crosshair');
+
+            const rgbaColor = hexToRgba(config.color, config.opacity / 100);
+            const outlineStyle = (config.enableOutline && config.outline > 0) ? 
+                `0 0 ${config.outline}px ${config.outlineColor}, 0 0 ${config.outline * 2}px ${config.outlineColor}` : 'none';
+
+            // Apply rotation
+            if (config.rotated45) {
+                crosshair.style.transform = 'translate(-50%, -50%) rotate(45deg)';
+            } else {
+                crosshair.style.transform = 'translate(-50%, -50%) rotate(0deg)';
+            }
+
+            // Top line
+            if (config.hideTop && !config.rotated45) {
+                top.style.display = 'none';
+            } else {
+                top.style.display = 'block';
+                top.style.width = config.thickness + 'px';
+                top.style.height = config.size + 'px';
+                top.style.background = rgbaColor;
+                top.style.boxShadow = outlineStyle;
+                top.style.top = -(config.size + config.gap) + 'px';
+                top.style.left = -(config.thickness / 2) + 'px';
+            }
+
+            // Bottom line
+            bottom.style.width = config.thickness + 'px';
+            bottom.style.height = config.size + 'px';
+            bottom.style.background = rgbaColor;
+            bottom.style.boxShadow = outlineStyle;
+            bottom.style.top = config.gap + 'px';
+            bottom.style.left = -(config.thickness / 2) + 'px';
+
+            // Left line
+            left.style.width = config.size + 'px';
+            left.style.height = config.thickness + 'px';
+            left.style.background = rgbaColor;
+            left.style.boxShadow = outlineStyle;
+            left.style.left = -(config.size + config.gap) + 'px';
+            left.style.top = -(config.thickness / 2) + 'px';
+
+            // Right line
+            right.style.width = config.size + 'px';
+            right.style.height = config.thickness + 'px';
+            right.style.background = rgbaColor;
+            right.style.boxShadow = outlineStyle;
+            right.style.left = config.gap + 'px';
+            right.style.top = -(config.thickness / 2) + 'px';
+
+            // Dot
+            if (config.showDot) {
+                dot.style.display = 'block';
+                dot.style.width = config.dotSize + 'px';
+                dot.style.height = config.dotSize + 'px';
+                dot.style.background = rgbaColor;
+                dot.style.boxShadow = outlineStyle;
+            } else {
+                dot.style.display = 'none';
+            }
+
+            // Update body background
+            const body = document.body;
+            if (config.transparentBg) {
+                body.classList.add('transparent-bg');
+            } else {
+                body.classList.remove('transparent-bg');
+            }
+        }
+
+        function hexToRgba(hex, alpha) {
+            const r = parseInt(hex.slice(1, 3), 16);
+            const g = parseInt(hex.slice(3, 5), 16);
+            const b = parseInt(hex.slice(5, 7), 16);
+            return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+        }
+
+        function setupControls() {
+            document.getElementById('size').addEventListener('input', (e) => {
+                config.size = parseInt(e.target.value);
+                document.getElementById('sizeVal').textContent = config.size;
+                updateCrosshair();
+            });
+
+            document.getElementById('thickness').addEventListener('input', (e) => {
+                config.thickness = parseInt(e.target.value);
+                document.getElementById('thicknessVal').textContent = config.thickness;
+                updateCrosshair();
+            });
+
+            document.getElementById('gap').addEventListener('input', (e) => {
+                config.gap = parseInt(e.target.value);
+                document.getElementById('gapVal').textContent = config.gap;
+                updateCrosshair();
+            });
+
+            document.getElementById('outline').addEventListener('input', (e) => {
+                config.outline = parseInt(e.target.value);
+                document.getElementById('outlineVal').textContent = config.outline;
+                updateCrosshair();
+            });
+
+            document.getElementById('opacity').addEventListener('input', (e) => {
+                config.opacity = parseInt(e.target.value);
+                document.getElementById('opacityVal').textContent = config.opacity + '%';
+                updateCrosshair();
+            });
+
+            document.getElementById('color').addEventListener('input', (e) => {
+                config.color = e.target.value;
+                updateCrosshair();
+            });
+
+            document.getElementById('outlineColor').addEventListener('input', (e) => {
+                config.outlineColor = e.target.value;
+                updateCrosshair();
+            });
+
+            document.getElementById('showDot').addEventListener('change', (e) => {
+                config.showDot = e.target.checked;
+                updateCrosshair();
+            });
+
+            document.getElementById('dotSize').addEventListener('input', (e) => {
+                config.dotSize = parseInt(e.target.value);
+                document.getElementById('dotSizeVal').textContent = config.dotSize;
+                updateCrosshair();
+            });
+
+            document.getElementById('rotated45').addEventListener('change', (e) => {
+                config.rotated45 = e.target.checked;
+                if (config.rotated45) {
+                    config.hideTop = false;
+                    document.getElementById('hideTop').checked = false;
+                    document.getElementById('hideTop').disabled = true;
+                } else {
+                    document.getElementById('hideTop').disabled = false;
+                }
+                updateCrosshair();
+            });
+
+            document.getElementById('hideTop').addEventListener('change', (e) => {
+                config.hideTop = e.target.checked;
+                updateCrosshair();
+            });
+
+            document.getElementById('enableOutline').addEventListener('change', (e) => {
+                config.enableOutline = e.target.checked;
+                updateCrosshair();
+            });
+
+            document.getElementById('transparentBg').addEventListener('change', (e) => {
+                config.transparentBg = e.target.checked;
+                updateCrosshair();
+            });
+        }
+
+        function generateCode() {
+            const encoded = btoa(JSON.stringify(config));
+            const url = window.location.origin + window.location.pathname + '?code=' + encoded;
+            const onlyCode = '?code=' + encoded;
+            document.getElementById('codeDisplay').style.display = 'block';
+            document.getElementById('codeDisplay').textContent = onlyCode; //url;
+        }
+
+        function copyCode() {
+            const codeDisplay = document.getElementById('codeDisplay');
+            if (codeDisplay.style.display === 'none' || !codeDisplay.textContent) {
+                generateCode();
+            }
+            navigator.clipboard.writeText(codeDisplay.textContent).then(() => {
+                const btn = event.target;
+                const originalText = btn.textContent;
+                btn.textContent = '✓ Copiado!';
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                }, 2000);
+            });
+        }
+
+        function loadFromURL() {
+            const params = new URLSearchParams(window.location.search);
+            const code = params.get('code');
+            if (code) {
+                try {
+                    const decoded = JSON.parse(atob(code));
+                    Object.assign(config, decoded);
+                    
+                    // Update inputs
+                    document.getElementById('size').value = config.size;
+                    document.getElementById('sizeVal').textContent = config.size;
+                    document.getElementById('thickness').value = config.thickness;
+                    document.getElementById('thicknessVal').textContent = config.thickness;
+                    document.getElementById('gap').value = config.gap;
+                    document.getElementById('gapVal').textContent = config.gap;
+                    document.getElementById('outline').value = config.outline;
+                    document.getElementById('outlineVal').textContent = config.outline;
+                    document.getElementById('opacity').value = config.opacity;
+                    document.getElementById('opacityVal').textContent = config.opacity + '%';
+                    document.getElementById('color').value = config.color;
+                    document.getElementById('outlineColor').value = config.outlineColor;
+                    document.getElementById('showDot').checked = config.showDot;
+                    document.getElementById('dotSize').value = config.dotSize;
+                    document.getElementById('dotSizeVal').textContent = config.dotSize;
+                    document.getElementById('rotated45').checked = config.rotated45 || false;
+                    document.getElementById('hideTop').checked = config.hideTop || false;
+                    document.getElementById('enableOutline').checked = config.enableOutline !== false;
+                    document.getElementById('transparentBg').checked = config.transparentBg || false;
+                    
+                    if (config.rotated45) {
+                        document.getElementById('hideTop').disabled = true;
+                    }
+                } catch (e) {
+                    console.error('Erro ao carregar configuração:', e);
+                }
+            }
+        }
+
+        function resetSettings() {
+            config.size = 10;
+            config.thickness = 2;
+            config.gap = 4;
+            config.outline = 1;
+            config.opacity = 100;
+            config.color = '#ffffff';
+            config.outlineColor = '#000000';
+            config.showDot = true;
+            config.dotSize = 4;
+            config.rotated45 = false;
+            config.hideTop = false;
+            config.enableOutline = true;
+            config.transparentBg = false;
+
+            document.getElementById('size').value = 10;
+            document.getElementById('sizeVal').textContent = 10;
+            document.getElementById('thickness').value = 2;
+            document.getElementById('thicknessVal').textContent = 2;
+            document.getElementById('gap').value = 4;
+            document.getElementById('gapVal').textContent = 4;
+            document.getElementById('outline').value = 1;
+            document.getElementById('outlineVal').textContent = 1;
+            document.getElementById('opacity').value = 100;
+            document.getElementById('opacityVal').textContent = '100%';
+            document.getElementById('color').value = '#ffffff';
+            document.getElementById('outlineColor').value = '#000000';
+            document.getElementById('showDot').checked = true;
+            document.getElementById('dotSize').value = 4;
+            document.getElementById('dotSizeVal').textContent = 4;
+            document.getElementById('rotated45').checked = false;
+            document.getElementById('hideTop').checked = false;
+            document.getElementById('hideTop').disabled = false;
+            document.getElementById('enableOutline').checked = true;
+            document.getElementById('transparentBg').checked = false;
+
+            document.getElementById('codeDisplay').style.display = 'none';
+            updateCrosshair();
+        }
+
+        // Initialize
+        loadFromURL();
+        setupControls();
+        updateCrosshair();
+    </script>
+</body>
+</html>
